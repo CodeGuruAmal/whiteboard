@@ -5,7 +5,8 @@ const initialState = {
   isDrawing: false,
   undoStack: [],
   redoStack: [],
-  selectedShape: null
+  isDrag: false,
+  // selectedNode: null
 };
 
 const drawSlice = createSlice({
@@ -34,12 +35,16 @@ const drawSlice = createSlice({
       state.undoStack.push([...state.shapes]);
       state.redoStack = []; 
     },
-    setSelectedShape: (state, action) => {
-      state.selectedShape = action.payload;
-    }
+    setIsDrag: (state, action) => {
+      state.isDrag = action.payload;
+    },
+
+    // setSelectedNode: (state, action) => {
+    //   state.selectedNode = action.payload;
+    // }
   },
 });
 
-export const { setShapes, setIsDrawing, setUndo, setRedo, addToUndoStack, setSelectedShape } = drawSlice.actions;
+export const { setShapes, setIsDrawing, setUndo, setRedo, addToUndoStack, setIsDrag } = drawSlice.actions;
 
 export default drawSlice.reducer;

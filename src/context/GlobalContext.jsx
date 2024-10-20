@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState } from "react";
 
-const SettingContext = createContext();
+const GlobalContext = createContext();
 
-export const SettingProvider = ({ children }) => {
+export const GlobalProvider = ({ children }) => {
   const [strokeColor, setStrokeColor] = useState("#e4e4e7");
   const [strokeWidth, setStrokeWidth] = useState(1);
   const [fillColor, setFillColor] = useState("#e4e4e700");
+  const [selectedNode, setSelectedNode] = useState(null);
+
 
   const handleStrokeColor = (color) => {
     setStrokeColor(color)
@@ -21,7 +23,7 @@ export const SettingProvider = ({ children }) => {
 
 
   return (
-    <SettingContext.Provider
+    <GlobalContext.Provider
       value={{
         handleStrokeColor,
         handleFillColor,
@@ -29,14 +31,16 @@ export const SettingProvider = ({ children }) => {
         strokeColor,
         fillColor,
         strokeWidth,
+        selectedNode,
+        setSelectedNode,
       }}
     >
       {children}
-    </SettingContext.Provider>
+    </GlobalContext.Provider>
   );
 };
 
 
-export const useSetting = () => useContext(SettingContext);
+export const useGlobal = () => useContext(GlobalContext);
 
-export default SettingContext;
+export default GlobalContext;

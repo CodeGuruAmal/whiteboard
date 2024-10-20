@@ -4,7 +4,9 @@ const controlSlice = createSlice({
     name: "control",
     initialState: {
         toolSelected: "mouse",
-        menuClick: false
+        menuClick: false,
+        stageScale: 1,
+        stagePosition: { x: 0, y: 0 }
     },
     reducers: {
         setToolSelected: (state, action) => {
@@ -14,8 +16,16 @@ const controlSlice = createSlice({
             state.menuClick = action.payload;
         },
 
+        setStageScale: (state, action) => {
+            state.stageScale = action.payload;
+        },
+        
+        setStagePosition: (state, action) => {
+            state.stagePosition = action.payload;
+        }   
+
     }
 });
 
-export const {setToolSelected, setMenuClick} = controlSlice.actions;
+export const {setToolSelected, setMenuClick, setStageScale, setStagePosition} = controlSlice.actions;
 export default controlSlice.reducer

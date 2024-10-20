@@ -1,17 +1,18 @@
 import React, { useRef } from "react";
 import { Arrow, Ellipse, Line, Rect } from "react-konva";
 import { useDispatch, useSelector } from "react-redux";
-import { setSelectedShape } from "../../utils/drawSlice";
+import { useDrag } from "../../hooks/useDrag";
 
 const ShapeRenderer = ({ onShapeSelect }) => {
   const dispatch = useDispatch();
   const shapes = useSelector((state) => state.draw.shapes);
   const toolSelected = useSelector((state) => state.control.toolSelected);
+  const isDrag = useSelector((state) => state.draw.isDrag);
   const shapeRefs = useRef([]);
+  const {handleDragEnd} = useDrag();
 
   const handleShapeSelect = (index) => {
     if (toolSelected === "mouse") {
-      dispatch(setSelectedShape(index));
       onShapeSelect(shapeRefs.current[index]);
     }
   };
@@ -37,9 +38,9 @@ const ShapeRenderer = ({ onShapeSelect }) => {
                 lineJoin="round"
                 onClick={() => handleShapeSelect(index)}
                 onTap={() => handleShapeSelect(index)}
-                draggable
+                draggable={isDrag}
                 rotation={item.rotation}
-                // onDragEnd={(e) => handleDragEnd(e, index)}
+                onDragEnd={(e) => handleDragEnd(e, index)}
               />
             );
             break;
@@ -58,9 +59,9 @@ const ShapeRenderer = ({ onShapeSelect }) => {
                 fill={item.fillColor}
                 onClick={() => handleShapeSelect(index)}
                 onTap={() => handleShapeSelect(index)}
-                draggable
+                draggable={isDrag}
                 rotation={item.rotation}
-                // onDragEnd={(e) => handleDragEnd(e, index)}
+                onDragEnd={(e) => handleDragEnd(e, index)}
               />
             );
             break;
@@ -87,9 +88,9 @@ const ShapeRenderer = ({ onShapeSelect }) => {
                 lineJoin="round"
                 onClick={() => handleShapeSelect(index)}
                 onTap={() => handleShapeSelect(index)}
-                draggable
+                draggable={isDrag}
                 rotation={item.rotation}
-                // onDragEnd={(e) => handleDragEnd(e, index)}
+                onDragEnd={(e) => handleDragEnd(e, index)}
               />
             );
             break;
@@ -114,7 +115,7 @@ const ShapeRenderer = ({ onShapeSelect }) => {
                 lineJoin="round"
                 onClick={() => handleShapeSelect(index)}
                 onTap={() => handleShapeSelect(index)}
-                draggable
+                draggable={isDrag}
                 rotation={item.rotation}
                 // onDragEnd={(e) => handleDragEnd(e, index)}
               />
@@ -141,7 +142,7 @@ const ShapeRenderer = ({ onShapeSelect }) => {
                 lineJoin="round"
                 onClick={() => handleShapeSelect(index)}
                 onTap={() => handleShapeSelect(index)}
-                draggable
+                draggable={isDrag}
                 rotation={item.rotation}
                 // onDragEnd={(e) => handleDragEnd(e, index)}
               />

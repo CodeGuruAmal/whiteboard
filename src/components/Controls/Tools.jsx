@@ -10,9 +10,12 @@ import { HiArrowNarrowRight } from "react-icons/hi";
 import { FaRegHandPaper } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { setToolSelected } from "../../utils/controlSlice";
+import { useGlobal } from "../../context/GlobalContext";
 const Tools = () => {
-  const toolSelected = useSelector((state) => state.control.toolSelected);
   const dispatch = useDispatch();
+  const toolSelected = useSelector((state) => state.control.toolSelected);
+  const { selectedNode, setSelectedNode } =
+    useGlobal();
 
   const iconMapping = {
     hand: <FaRegHandPaper />,
@@ -49,7 +52,10 @@ const Tools = () => {
           {tool.map((t, index) => {
             return (
               <button
-                onClick={() => handleToolClick(t.type)}
+                onClick={() => {
+                  handleToolClick(t.type);
+                  setSelectedNode(null);
+                }}
                 key={index}
                 className={`p-2 hover:bg-[#694a8b] ${
                   toolSelected === t.type ? "bg-[#694a8b]" : "bg-[#232329]"

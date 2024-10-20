@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { useSetting } from "../../context/SettingContext";
 import { PiMinusLight, PiMinusBold } from "react-icons/pi";
 import { FaMinus } from "react-icons/fa";
 import { useSelector } from "react-redux";
+import { useGlobal } from "../../context/GlobalContext";
 
 const Settings = () => {
-
   const toolSelected = useSelector((state) => state.control.toolSelected);
   const {
     handleFillColor,
@@ -15,8 +14,8 @@ const Settings = () => {
     strokeStyle,
     fillColor,
     strokeWidth,
-  } = useSetting();
-
+    selectedNode,
+  } = useGlobal();
 
   const [stroke] = useState([
     { id: 1, color: "#e4e4e7", bgColor: "bg-zinc-200" },
@@ -27,7 +26,11 @@ const Settings = () => {
     { id: 6, color: "#01010", bgColor: "bg-zinc-950" },
   ]);
   const [fill] = useState([
-    { id: 0, color: "#e4e4e700", bgColor: "bg-[url('../../../public/img/png.jpg')]" },
+    {
+      id: 0,
+      color: "#e4e4e700",
+      bgColor: "bg-[url('../../../public/img/png.jpg')]",
+    },
     { id: 1, color: "#e4e4e7", bgColor: "bg-zinc-200" },
     { id: 2, color: "#dc2626", bgColor: "bg-red-600" },
     { id: 3, color: "#facc15", bgColor: "bg-yellow-400" },
@@ -36,11 +39,18 @@ const Settings = () => {
     { id: 6, color: "#01010", bgColor: "bg-zinc-950" },
   ]);
 
+  // console.log(Boolean(selectedNode))
+
   return (
-    <div className={`${toolSelected === "hand" || toolSelected === "mouse" ? "hidden" : "flex"} p-3 text-zinc-300 text-xs tracking-wider scroll-pl-12 rounded-lg bg-[#232329] flex-col gap-3 absolute z-50 top-16 left-4`}>
+    <div
+      className={`${
+        toolSelected === "hand" || toolSelected === "mouse"
+          ? "hidden"
+          : "flex"
+      } p-3 text-zinc-300 text-xs tracking-wider scroll-pl-12 rounded-lg bg-[#232329] flex-col gap-3 absolute z-50 top-16 left-4`}
+    >
       <div>
         <h4>Stroke</h4>
-
         <div className="option flex items-center gap-3 mt-2">
           {stroke.map((item) => {
             return (

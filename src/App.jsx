@@ -1,14 +1,14 @@
 import React from "react";
 import Canvas from "./components/Draw/Canvas";
 import Option from "./components/Option";
-import { SettingProvider } from "./context/SettingContext";
+import { GlobalProvider } from "./context/GlobalContext";
 
 const App = () => {
   return (
-    <SettingProvider>
+    <GlobalProvider>
       <Option />
       <Canvas />
-    </SettingProvider>
+    </GlobalProvider>
   );
 };
 
