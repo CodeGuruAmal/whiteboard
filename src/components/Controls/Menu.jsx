@@ -8,6 +8,7 @@ import {
   PiFolderBold,
   PiTrashBold,
 } from "react-icons/pi";
+import { useGlobal } from "../../context/GlobalContext";
 const Menu = () => {
   const iconMapping = {
     open: <PiFolderBold />,
@@ -24,6 +25,8 @@ const Menu = () => {
   const menuClick = useSelector((state) => state.control.menuClick);
   const dispatch = useDispatch();
 
+  const { setSelectedNode } = useGlobal();
+
   const toggleMenuClick = () => {
     dispatch(setMenuClick(!menuClick));
   };
@@ -33,6 +36,7 @@ const Menu = () => {
 
     dispatch(setShapes([]));
     dispatch(setMenuClick(false))
+    setSelectedNode(null);
 
   };
 

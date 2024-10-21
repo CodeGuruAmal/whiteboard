@@ -2,6 +2,8 @@ import React, { useRef } from "react";
 import { Arrow, Ellipse, Line, Rect } from "react-konva";
 import { useDispatch, useSelector } from "react-redux";
 import { useDrag } from "../../hooks/useDrag";
+import { setIsDrag, setSelectedShapeId } from "../../utils/drawSlice";
+import { useGlobal } from "../../context/GlobalContext";
 
 const ShapeRenderer = ({ onShapeSelect }) => {
   const dispatch = useDispatch();
@@ -9,25 +11,36 @@ const ShapeRenderer = ({ onShapeSelect }) => {
   const toolSelected = useSelector((state) => state.control.toolSelected);
   const isDrag = useSelector((state) => state.draw.isDrag);
   const shapeRefs = useRef([]);
-  const {handleDragEnd} = useDrag();
-
-  const handleShapeSelect = (index) => {
+  const { handleDragEnd } = useDrag();
+  const { setSelectedNode } = useGlobal();
+  
+  const handleShapeSelect = (id) => {
+    // console.log(id)
     if (toolSelected === "mouse") {
-      onShapeSelect(shapeRefs.current[index]);
+      onShapeSelect(shapeRefs.current[id]);
     }
   };
 
-  // console.log(shapes)
+  const handleSelectedShapeId = (index) => {
+    // console.log(shapes)
+    if (toolSelected === "mouse") {
+      setSelectedNode(null);
+      dispatch(setSelectedShapeId(index));
+      dispatch(setIsDrag(true));
+    }
+  };
+
   return (
     <>
-      {shapes.map((item, index) => {
+      {shapes.map((item) => {
         let shapeNode = null;
+        // console.log(item.id)
         switch (item.type) {
           case "rectangle":
             shapeNode = (
               <Rect
-                key={index}
-                ref={(node) => (shapeRefs.current[index] = node)}
+                key={item.id}
+                ref={(node) => (shapeRefs.current[item.id] = node)}
                 x={item.x}
                 y={item.y}
                 strokeWidth={item.strokeWidth}
@@ -36,11 +49,11 @@ const ShapeRenderer = ({ onShapeSelect }) => {
                 width={item.width}
                 height={item.height}
                 lineJoin="round"
-                onClick={() => handleShapeSelect(index)}
-                onTap={() => handleShapeSelect(index)}
+                onClick={() => handleShapeSelect(item.id)}
+                onTap={() => handleShapeSelect(item.id)}
                 draggable={isDrag}
                 rotation={item.rotation}
-                onDragEnd={(e) => handleDragEnd(e, index)}
+                onDragEnd={(e) => handleDragEnd(e, item.id)}
               />
             );
             break;
@@ -48,8 +61,8 @@ const ShapeRenderer = ({ onShapeSelect }) => {
           case "ellipse":
             shapeNode = (
               <Ellipse
-                key={index}
-                ref={(node) => (shapeRefs.current[index] = node)}
+                key={item.id}
+                ref={(node) => (shapeRefs.current[item.id] = node)}
                 x={item.x + item.width / 2}
                 y={item.y + item.height / 2}
                 radiusX={Math.abs(item.width) / 2}
@@ -57,40 +70,37 @@ const ShapeRenderer = ({ onShapeSelect }) => {
                 strokeWidth={item.strokeWidth}
                 stroke={item.strokeColor}
                 fill={item.fillColor}
-                onClick={() => handleShapeSelect(index)}
-                onTap={() => handleShapeSelect(index)}
+                onClick={() => handleShapeSelect(item.id)}
+                onTap={() => handleShapeSelect(item.id)}
                 draggable={isDrag}
                 rotation={item.rotation}
-                onDragEnd={(e) => handleDragEnd(e, index)}
+                onDragEnd={(e) => handleDragEnd(e, item.id)}
               />
             );
             break;
 
-           case "arrow":
+          case "arrow":
             shapeNode = (
               <Arrow
-                key={index}
-                ref={(node) => (shapeRefs.current[index] = node)}
-                points={[
-                  item.x,
-                  item.y,
-                  item.x + item.width,
-                  item.y + item.height,
-                ]}
+                key={item.id}
+                ref={(node) => (shapeRefs.current[item.id] = node)}
+                points={item.points}
                 strokeWidth={item.strokeWidth}
                 stroke={item.strokeColor}
-                fill={item.fillColor}
+                fill={
+                  item.fillColor === "#e4e4e700" ? "#e4e4e7" : item.fillColor
+                }
                 hitStrokeWidth={30}
                 pointerLength={10}
-                pointerWidth={10}
+                pointerWidth={8}
                 lineCap="round"
                 tension={0.5}
                 lineJoin="round"
-                onClick={() => handleShapeSelect(index)}
-                onTap={() => handleShapeSelect(index)}
+                onClick={() => handleSelectedShapeId(item.id)}
+                onTap={() => handleSelectedShapeId(item.id)}
                 draggable={isDrag}
                 rotation={item.rotation}
-                onDragEnd={(e) => handleDragEnd(e, index)}
+                onDragEnd={(e) => handleDragEnd(e, item.id)}
               />
             );
             break;
@@ -98,56 +108,48 @@ const ShapeRenderer = ({ onShapeSelect }) => {
           case "line":
             shapeNode = (
               <Line
-                key={index}
-                ref={(node) => (shapeRefs.current[index] = node)}
-                points={[
-                  item.x,
-                  item.y,
-                  item.x + item.width,
-                  item.y + item.height,
-                ]}
+                key={item.id}
+                ref={(node) => (shapeRefs.current[item.id] = node)}
+                points={item.points}
                 strokeWidth={item.strokeWidth}
                 hitStrokeWidth={30}
                 stroke={item.strokeColor}
-                fill={item.fillColor}
                 lineCap="round"
                 tension={0.5}
                 lineJoin="round"
-                onClick={() => handleShapeSelect(index)}
-                onTap={() => handleShapeSelect(index)}
+                onClick={() => handleSelectedShapeId(item.id)}
+                onTap={() => handleSelectedShapeId(item.id)}
                 draggable={isDrag}
                 rotation={item.rotation}
-                // onDragEnd={(e) => handleDragEnd(e, index)}
+                onDragEnd={(e) => handleDragEnd(e, item.id)}
               />
             );
             break;
-            
 
           case "pencil":
             shapeNode = (
               <Line
-                key={index}
-                ref={(node) => (shapeRefs.current[index] = node)}
+                key={item.id}
+                ref={(node) => (shapeRefs.current[item.id] = node)}
                 points={
                   item.points
                     ? item.points.flatMap((point) => [point.x, point.y])
                     : []
                 }
                 stroke={item.strokeColor}
-                fill={item.fillColor}
                 hitStrokeWidth={30}
                 strokeWidth={item.strokeWidth}
                 lineCap="round"
                 tension={0.4}
                 lineJoin="round"
-                onClick={() => handleShapeSelect(index)}
-                onTap={() => handleShapeSelect(index)}
+                onClick={() => handleShapeSelect(item.id)}
+                onTap={() => handleShapeSelect(item.id)}
                 draggable={isDrag}
                 rotation={item.rotation}
-                // onDragEnd={(e) => handleDragEnd(e, index)}
+                onDragEnd={(e) => handleDragEnd(e, item.id)}
               />
             );
-            break; 
+            break;
 
           default:
             return null;

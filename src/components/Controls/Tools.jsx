@@ -11,6 +11,7 @@ import { FaRegHandPaper } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { setToolSelected } from "../../utils/controlSlice";
 import { useGlobal } from "../../context/GlobalContext";
+import { setIsDrag, setSelectedShapeId } from "../../utils/drawSlice";
 const Tools = () => {
   const dispatch = useDispatch();
   const toolSelected = useSelector((state) => state.control.toolSelected);
@@ -26,7 +27,7 @@ const Tools = () => {
     line: <PiMinusBold />,
     pencil: <LuPencil />,
     text: <PiTextTBold />,
-    image: <LuImage />,
+    // image: <LuImage />,
   };
 
   const [tool] = useState([
@@ -38,11 +39,12 @@ const Tools = () => {
     { type: "line" },
     { type: "pencil" },
     { type: "text" },
-    { type: "image" },
+    // { type: "image" },
   ]);
 
   const handleToolClick = (type) => {
     dispatch(setToolSelected(type));
+    dispatch(setIsDrag(false))
   };
 
   return (
@@ -55,6 +57,7 @@ const Tools = () => {
                 onClick={() => {
                   handleToolClick(t.type);
                   setSelectedNode(null);
+                  dispatch(setSelectedShapeId(null))
                 }}
                 key={index}
                 className={`p-2 hover:bg-[#694a8b] ${

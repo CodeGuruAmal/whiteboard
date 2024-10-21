@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Layer, Shape, Stage, Transformer } from "react-konva";
+import { Circle, Layer, Rect, Shape, Stage, Transformer } from "react-konva";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addToUndoStack,
   setIsDrag,
   setIsDrawing,
+  setSelectedShapeId,
   setShapes,
 } from "../../utils/drawSlice";
 import ShapeRenderer from "./ShapeRenderer";
@@ -18,8 +19,9 @@ const Canvas = () => {
   const toolSelected = useSelector((state) => state.control.toolSelected);
   const shapes = useSelector((state) => state.draw.shapes);
   const isDrawing = useSelector((state) => state.draw.isDrawing);
-
-  const { strokeColor, strokeWidth, fillColor, selectedNode, setSelectedNode } = useGlobal();
+  const selectedShapeId = useSelector((state) => state.draw.selectedShapeId);
+  const { strokeColor, strokeWidth, fillColor, selectedNode, setSelectedNode } =
+    useGlobal();
   const transformerRef = useRef();
 
   const {
@@ -43,7 +45,7 @@ const Canvas = () => {
           setShapes([
             ...shapes,
             {
-              id: shapes.length,
+              id: shapes.length + 1,
               points: [{ x, y }],
               type: toolSelected,
               strokeColor: strokeColor,
@@ -52,12 +54,26 @@ const Canvas = () => {
             },
           ])
         );
+      } else if (toolSelected === "arrow" || toolSelected === "line") {
+        dispatch(
+          setShapes([
+            ...shapes,
+            {
+              id: shapes.length + 1,
+              points: [x, y, x, y],
+              type: toolSelected,
+              strokeColor: strokeColor,
+              fillColor: fillColor,
+              strokeWidth: strokeWidth,
+            },
+          ])
+        );
       } else {
         dispatch(
           setShapes([
             ...shapes,
             {
-              id: shapes.length,
+              id: shapes.length + 1,
               x,
               y,
               width: 0,
@@ -76,6 +92,7 @@ const Canvas = () => {
 
   const handleMove = (e) => {
     if (!isDrawing) return;
+
     const pointer = e.target.getStage().getPointerPosition();
     const { x, y } = transformPointerPosition(pointer);
     const lastShape = shapes[shapes.length - 1];
@@ -89,20 +106,33 @@ const Canvas = () => {
       dispatch(setShapes(shapes.slice(0, -1)));
     }
 
-    const updatedShapes = shapes.map((shape, index) =>
-      index === shapes.length - 1
-        ? {
+    const updatedShapes = shapes.map((shape, index) => {
+      if (index === shapes.length - 1) {
+        if (toolSelected === "pencil") {
+          return {
             ...shape,
-            ...(toolSelected === "pencil"
-              ? { points: [...shape.points, { x, y }] }
-              : { width: x - shape.x, height: y - shape.y }),
-          }
-        : shape
-    );
+            points: [...shape.points, { x, y }],
+          };
+        } else if (toolSelected === "line" || toolSelected === "arrow") {
+          const updatedPoints = [...shape.points.slice(0, 2), x, y];
+          return {
+            ...shape,
+            points: updatedPoints,
+          };
+        } else {
+          return {
+            ...shape,
+            width: x - shape.x,
+            height: y - shape.y,
+          };
+        }
+      } else {
+        return shape;
+      }
+    });
 
+    // console.log(updatedShapes)
     dispatch(setShapes(updatedShapes));
-
-    
   };
 
   const handleEnd = (e) => {
@@ -110,13 +140,17 @@ const Canvas = () => {
     if (toolSelected !== "hand" && toolSelected !== "pencil") {
       dispatch(setToolSelected("mouse"));
     }
-
-
   };
 
   const handleShapeSelect = (node) => {
-    console.log(shapes)
-    setSelectedNode(node);
+    // console.log(node);
+
+    
+      dispatch(setSelectedShapeId(null))
+      setSelectedNode(node);
+    
+    // console.log(selectedShapeId)
+
     if (toolSelected === "mouse" && toolSelected !== "pencil") {
       dispatch(setIsDrag(true));
     }
@@ -125,6 +159,7 @@ const Canvas = () => {
   const handleCanvasClick = (e) => {
     if (e.target === e.target.getStage()) {
       setSelectedNode(null);
+      dispatch(setSelectedShapeId(null));
       dispatch(setIsDrag(false));
     }
   };
@@ -138,9 +173,9 @@ const Canvas = () => {
 
   const handleTransformEnd = (e) => {
     const node = e.target;
-
+// console.log(selectedNode.index)
     const updatedShapes = shapes.map((shape) => {
-      if (shape.id === selectedNode.index) {
+      if (shape.id === selectedNode.index + 1) {
         switch (shape.type) {
           case "rectangle":
             return {
@@ -186,7 +221,7 @@ const Canvas = () => {
         dispatch(addToUndoStack());
 
         const deletedShapes = shapes.filter(
-          (_, index) => index !== selectedNode.index
+          (_, id) => id !== selectedNode.index || id - 1 === selectedShapeId
         );
 
         dispatch(setShapes(deletedShapes));
@@ -200,6 +235,14 @@ const Canvas = () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [selectedNode]);
+
+
+  const updateShapePoints = (newPoints) => {
+    const updatedShapes = shapes.map((shape) =>
+      shape.id === selectedShapeId ? { ...shape, points: newPoints } : shape
+    );
+    dispatch(setShapes(updatedShapes));
+  };
 
   return (
     <>
@@ -244,12 +287,68 @@ const Canvas = () => {
             visible={!!selectedNode}
             borderStroke="#b1afea"
             borderStrokeWidth={1}
-            anchorStroke="#b1afea"
-            anchorFill="#b1afea"
+            anchorStroke="#938ffc"
+            anchorFill="#938ffc"
             anchorSize={7}
             anchorCornerRadius={2}
             padding={4}
           />
+
+          {/* {console.log(selectedShapeId)} */}
+          {/* {selectedShapeId && (
+            <>{shapes.map((shape) => {
+              return (
+                <Rect x={50} y={50} width={100} height={50} fill={"red"} />
+              )
+            })}</>
+          )} */}
+
+          {selectedShapeId && (
+            <>
+              {shapes.map((shape) => {
+                if (shape.id === selectedShapeId) {
+                  return (
+                    <React.Fragment key={shape.id}>
+                      <Circle
+                        x={shape.points[0]}
+                        y={shape.points[1]}
+                        radius={5 * (stageScale < 1 ? 1 / stageScale : 1)}
+                        fill="#938ffc"
+                        stroke="#938ffc"
+                        draggable
+                        onDragMove={(e) => {
+                          const newPoints = [...shape.points];
+                          newPoints[0] = e.target.x();
+                          newPoints[1] = e.target.y();
+                          updateShapePoints(newPoints); // Update shape points
+                        }}
+                        onDragStart={() => dispatch(addToUndoStack())}
+    
+
+                      />
+
+                      <Circle
+                        x={shape.points[2]}
+                        y={shape.points[3]}
+                        radius={5 * (stageScale < 1 ? 1 / stageScale : 1)}
+                        fill="#938ffc"
+                        stroke="#938ffc" 
+                        draggable
+                        onDragMove={(e) => {
+                          const newPoints = [...shape.points];
+                          newPoints[2] = e.target.x();
+                          newPoints[3] = e.target.y();
+                          updateShapePoints(newPoints); // Update shape points
+                        }}
+                        onDragStart={() => dispatch(addToUndoStack())}
+                      />
+                    </React.Fragment>
+                  );
+                }
+                return null;
+              })}
+            </>
+          )}
         </Layer>
       </Stage>
     </>

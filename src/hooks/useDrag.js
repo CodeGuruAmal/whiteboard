@@ -6,7 +6,7 @@ export const useDrag = () => {
   const shapes = useSelector((state) => state.draw.shapes);
 
   const handleDragEnd = (e, index) => {
-    console.log(e);
+    // console.log(e.target);
     
     const updatedShapes = shapes.map((shape) => {
       if (shape.id === index) {
@@ -25,12 +25,11 @@ export const useDrag = () => {
               x: x - e.target.radiusX(),
               y: y - e.target.radiusY(),
             };
-            case "arrow":
-                return {
-                 ...shape,
-                  x: x - e.target.width() / 2,
-                  y: y - e.target.height() / 2,
-                };
+//             case "arrow":
+//                 return {
+//                   ...shape,
+// points: e.target.points().map((p) => p)
+//                 };
           default:
             return shape; 
         }
